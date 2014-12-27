@@ -1,0 +1,21 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Cameras\FollowCamera.cs">
+    <Files>
+      <File FileName="Assets\Scripts\Editor\ImportMD3.cs" Line="170" Column="6" />
+      <File FileName="Assets\Scripts\MathHelper.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\MD3Tag.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\MD3Model.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\MD3Player.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Control.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\MD2Model.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Bullet.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Cameras\DungeonCamera.cs" Line="20" Column="3" />
+      <File FileName="Assets\Scripts\Cameras\FollowCamera.cs" Line="14" Column="48" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
