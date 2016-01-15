@@ -1,4 +1,8 @@
 using System;
+
+
+public delegate void AnimationCompletedCallBack(Anim result);
+
 [System.Serializable]
 public class Anim
 {

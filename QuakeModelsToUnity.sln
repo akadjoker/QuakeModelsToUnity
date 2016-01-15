@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{0355BDA9-45BD-5590-33FC-ADEB19645DFF}") = "QuakeModelsToUnity", "Assembly-CSharp.csproj", "{46A2BC94-B0FF-D69C-6E58-785C461012C8}"
+EndProject
+Project("{0355BDA9-45BD-5590-33FC-ADEB19645DFF}") = "QuakeModelsToUnity", "Assembly-CSharp-Editor.csproj", "{7A6FF9D2-304B-E3D6-7310-0520275EBC33}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{46A2BC94-B0FF-D69C-6E58-785C461012C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46A2BC94-B0FF-D69C-6E58-785C461012C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46A2BC94-B0FF-D69C-6E58-785C461012C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46A2BC94-B0FF-D69C-6E58-785C461012C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A6FF9D2-304B-E3D6-7310-0520275EBC33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A6FF9D2-304B-E3D6-7310-0520275EBC33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A6FF9D2-304B-E3D6-7310-0520275EBC33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A6FF9D2-304B-E3D6-7310-0520275EBC33}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal

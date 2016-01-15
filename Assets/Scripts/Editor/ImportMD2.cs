@@ -1,4 +1,22 @@
-﻿using UnityEngine;
+﻿/*
+* 
+* Copyright (c) 2015 Luis Santos AKA DJOKER
+ * 
+* This software is provided 'as-is', without any express or implied 
+* warranty.  In no event will the authors be held liable for any damages 
+* arising from the use of this software. 
+* Permission is granted to anyone to use this software for any purpose, 
+* including commercial applications, and to alter it and redistribute it 
+* freely, subject to the following restrictions: 
+* 1. The origin of this software must not be misrepresented; you must not 
+* claim that you wrote the original software. If you use this software 
+* in a product, an acknowledgment in the product documentation would be 
+* appreciated but is not required. 
+* 2. Altered source versions must be plainly marked as such, and must not be 
+* misrepresented as being the original software. 
+* 3. This notice may not be removed or altered from any source distribution. 
+*/
+using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,9 +46,27 @@ public static class ImportMD2  {
 	}
 	public static void readMesh(string path,string filename)
 	{
+        string importingAssetsDir;
+     
 
-				if (File.Exists (path + "/" + filename)) {
+
+
+				if (File.Exists (path + "/" + filename)) 
+        {
+
+
 						string nm = Path.GetFileNameWithoutExtension (filename);
+
+
+
+                importingAssetsDir = "Assets/Prefabs/" + nm + "/";
+                if (!Directory.Exists(importingAssetsDir))
+                {
+                    Directory.CreateDirectory(importingAssetsDir);
+                }
+           
+
+
 						GameObject ObjectRoot = new GameObject (nm);
 						MD2Model model = (MD2Model)ObjectRoot.AddComponent (typeof(MD2Model));
 			            model.setup();
@@ -38,12 +74,7 @@ public static class ImportMD2  {
 
 			
 			
-						
-						List<Face> faces = new List<Face> ();
-						List<Face> tfaces = new List<Face> ();
-						List<Vector2> uvCoords = new List<Vector2> ();
-			          	Dictionary<int, List<Vector3>> frames =new Dictionary<int, List<Vector3>>();
-			
+				
 	
 						using (FileStream fs = File.OpenRead(path + "/" + filename)) 
 			{
@@ -71,21 +102,16 @@ public static class ImportMD2  {
 								int OffsetGlCommands = file.ReadInt32 ();
 								int OffsetEnd = file.ReadInt32 ();
 
-			
-				 int vertex_Count;
-				 int uv_count;
-				 int face_Count;
-				 int frames_Count;
-								frames_Count = NumFrames;
-								vertex_Count = NumVertices;
-								face_Count = NumTriangles;
-								uv_count = NumTexCoords;
 
-				Debug.Log("Num Vertices "+NumVertices);
-			
+
+                                model.maxFrames = NumFrames;
+								model.vertex_Count = NumVertices;
+								model.face_Count = NumTriangles;
+								model.uv_count = NumTexCoords;
+
+				
 				             file.BaseStream.Seek(OffsetTriangles,SeekOrigin.Begin);
-				Debug.Log("Num triangles"+NumTriangles);
-
+			
 				          for (int i=0; i<NumTriangles; i++) 
 				            {
 										int v0, v1, v2;
@@ -94,15 +120,17 @@ public static class ImportMD2  {
 					                    v0 =(int) file.ReadUInt16 ();
 				                    	v1 =(int) file.ReadUInt16 ();
 				                     	v2 =(int) file.ReadUInt16 ();
-					
-										faces.Add (new Face (v0, v1, v2));
+
+                    model.faces.Add(new Face (v0, v1, v2));
+									//	faces.Add (new Face (v0, v1, v2));
 
 
 										//texture faces
 										v0 =(int) file.ReadUInt16();
 					                    v1 =(int) file.ReadUInt16 ();
 					                    v2 =(int) file.ReadUInt16 ();
-										tfaces.Add (new Face (v0, v1, v2));
+									//	tfaces.Add (new Face (v0, v1, v2));
+                    model.tfaces.Add(new Face (v0, v1, v2));
 
 								}
 
@@ -112,11 +140,12 @@ public static class ImportMD2  {
 				{ 
 					float u=(float) file.ReadInt16()/SkinWidth;
 					float v=(float)1*- file.ReadInt16()/SkinWidth;
-					uvCoords.Add(new Vector2(u,v));
-				}
-
-				//**************************************************
-
+					//uvCoords.Add(new Vector2(u,v));
+                    model.uvCoords.Add(new Vector2(u,v));
+				}  
+ 
+				//************************************************** 
+ 
 				file.BaseStream.Seek(OffsetFrames,SeekOrigin.Begin);
 				Debug.Log("Num Frames"+NumFrames);
 				for (int i=0; i<NumFrames; i++) 
@@ -137,7 +166,7 @@ public static class ImportMD2  {
 
 					//Debug.LogWarning(new string(name));
 
-					frames[i]=new List<Vector3>();
+					//frames[i]=new List<Vector3>();
 							
 					for (int j=0; j<NumVertices; j++) 
 					{
@@ -150,41 +179,55 @@ public static class ImportMD2  {
 						float sx = Scale.x * x  + Translate.x;
 						float sy = Scale.z * z  + Translate.z;
 						float sz = Scale.y * y  + Translate.y;
-						frames[i].Add(new Vector3(sx,sy,sz));
-
+						//frames[i].Add(new Vector3(sx,sy,sz));
+                        model.vertex.Add(new Vector3(sx,sy,sz));
 					}
 
 
 				}
 
 		
+              
 
-				for (int f=0; f<NumFrames; f++) 
-				{
-					Surface surface= new Surface("frame_"+f);
-					for (int i=0; i<faces.Count; i++) 
+                Surface surface = new Surface("frame");
+					
+                for (int i=0; i<model.faces.Count; i++) 
 					{
-						Vector3 v1 = frames[f][faces[i].v0];
-						Vector3 v2 = frames[f][faces[i].v1];
-						Vector3 v3 = frames[f][faces[i].v2];
-						Vector2 uv1 = uvCoords[tfaces[i].v0];
-						Vector2 uv2 = uvCoords[tfaces[i].v1];
-						Vector2 uv3 = uvCoords[tfaces[i].v2];
+                    Vector3 v1 = model.vertex[0 * NumVertices+model.faces[i].v0];
+                    Vector3 v2 = model.vertex[0 * NumVertices+model.faces[i].v1];
+                    Vector3 v3 = model.vertex[0 * NumVertices+model.faces[i].v2];
+                        
+                    Vector2 uv1 = model.uvCoords[0 * NumVertices+model.tfaces[i].v0];
+                    Vector2 uv2 =  model.uvCoords[0 * NumVertices+model.tfaces[i].v1];
+                    Vector2 uv3 =  model.uvCoords[0 * NumVertices+model.tfaces[i].v2];
 						surface.addFace(v1, v2, v3, uv1, uv2, uv3);
 
 						
 					}
 					surface.build();
 					surface.RecalculateNormals();
-					model.frames.Add(surface.getMesh());
-				}
-
+                    surface.CulateTangents();
+                    model.frame=surface.getMesh();
+				
 			
 
+                model.meshRenderer.sharedMaterial = new Material(Shader.Find("Diffuse"));
+                model.meshRenderer.sharedMaterial.color = Color.white;
+               
 
 
-				model.meshFilter.sharedMesh=model.frames[0];
-				model.ready=true;
+                model.meshFilter.sharedMesh=model.frame;
+		
+
+                string materialAssetPath = AssetDatabase.GenerateUniqueAssetPath(importingAssetsDir + nm + "_mat.asset");
+                AssetDatabase.CreateAsset(model.meshRenderer.sharedMaterial, materialAssetPath);
+
+                string meshAssetPath = AssetDatabase.GenerateUniqueAssetPath(importingAssetsDir + nm + ".asset");
+                AssetDatabase.CreateAsset(model.frame, meshAssetPath);
+                string prefabPath = AssetDatabase.GenerateUniqueAssetPath(importingAssetsDir + nm + ".prefab");
+                var prefab = PrefabUtility.CreateEmptyPrefab(prefabPath);
+                PrefabUtility.ReplacePrefab(ObjectRoot, prefab, ReplacePrefabOptions.ConnectToPrefab);
+                AssetDatabase.Refresh();
 
 
 				Debug.LogWarning("read ok");

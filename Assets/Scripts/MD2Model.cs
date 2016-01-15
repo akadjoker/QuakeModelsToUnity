@@ -1,4 +1,21 @@
-﻿
+﻿/*
+* 
+* Copyright (c) 2015 Luis Santos AKA DJOKER
+ * 
+* This software is provided 'as-is', without any express or implied 
+* warranty.  In no event will the authors be held liable for any damages 
+* arising from the use of this software. 
+* Permission is granted to anyone to use this software for any purpose, 
+* including commercial applications, and to alter it and redistribute it 
+* freely, subject to the following restrictions: 
+* 1. The origin of this software must not be misrepresented; you must not 
+* claim that you wrote the original software. If you use this software 
+* in a product, an acknowledgment in the product documentation would be 
+* appreciated but is not required. 
+* 2. Altered source versions must be plainly marked as such, and must not be 
+* misrepresented as being the original software. 
+* 3. This notice may not be removed or altered from any source distribution. 
+*/
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,8 +23,9 @@ using System.Collections.Generic;
 
 public class MD2Model : MonoBehaviour {
 
-
+    [HideInInspector]
 	public MeshFilter meshFilter;
+    [HideInInspector]
 	public MeshRenderer meshRenderer;
 
 
@@ -27,28 +45,64 @@ public class MD2Model : MonoBehaviour {
 	private int rollto_anim ;
 	private bool RollOver;
 	private float lastTime;
-	public bool ready = false;
-	private float lerptime;
+   	private float lerptime;
 
+    public bool useKesy = false;
+    public int Frame;
+    public bool Manual = false;
 
 
 	[HideInInspector]
-	public List<Mesh> frames;
 	private List<Anim> animations;
+    [HideInInspector]
+    public List<Vector3> vertex;
+    [HideInInspector]
+    public List<Vector2> uvCoords;
+    [HideInInspector]
+    public List<Face> faces;
+    [HideInInspector]
+    public List<Face> tfaces;
+    [HideInInspector]
+    public int vertex_Count;
+    [HideInInspector]
+    public int uv_count;
+    [HideInInspector]
+    public int face_Count;
+
+    public int maxFrames;
 
 
+    [HideInInspector]
+    public AnimationCompletedCallBack AnimationComplete;
+    [HideInInspector]
+    public AnimationCompletedCallBack AnimationChange;
 
-//	[HideInInspector]
+
+	[HideInInspector]
 	public Mesh frame;
 
 	public  void setup()
 	{
 		 meshFilter = (MeshFilter)    this.transform.gameObject.AddComponent(typeof(MeshFilter));
 		 meshRenderer = (MeshRenderer)this.transform.gameObject.AddComponent(typeof(MeshRenderer));
-		 meshRenderer.sharedMaterial = new Material(Shader.Find("Diffuse"));
-		 meshRenderer.sharedMaterial.color = Color.white;
- 		 frames = new List<Mesh> ();
+	//	 meshRenderer.sharedMaterial = new Material(Shader.Find("Diffuse"));
+	//	 meshRenderer.sharedMaterial.color = Color.white;
+
+        vertex = new List<Vector3>();
+        uvCoords= new List<Vector2> ();
+        faces= new List<Face>();
+        tfaces= new List<Face>();
+
+        AnimationComplete = onAnimationComplete;
+        AnimationChange = onAnimationChange;
+	
 	}
+    void onAnimationComplete(Anim result)
+    {
+    }
+    void onAnimationChange(Anim result)
+    {
+    }
 	
 	public int addAnimation(string name,int  startFrame, int endFrame, int fps)
 	{
@@ -152,21 +206,9 @@ public class MD2Model : MonoBehaviour {
 		nextFrame = 1;
 
 		setAnimation(0);
-		ready = true;
-
-		/*
-		frame = new Mesh ();
-		frame.vertices  =(Vector3[])frames [0].vertices.Clone ();
-		frame.normals   =frames [0].normals;
-		frame.triangles =frames [0].triangles;
-
 	
 
-		Debug.LogWarning("Num vertices: "+	frame.vertices.Length);
-		Debug.LogWarning("Num uv: "+	frame.uv.Length);
-		Debug.LogWarning("Num frame uv: "+	frames [0].uv.Length);
-		//Debug.LogWarning("Num tris: "+	frame.triangles.Length);
-		*/
+	
 	
 	}
 
@@ -174,71 +216,129 @@ public class MD2Model : MonoBehaviour {
 	{
 		return Time.time;
 	}
+
+
+    void animate(int currentFrame,int nextFrame, float poll)
+    {
+
+        int currentOffsetVertex = currentFrame * vertex_Count;
+        int nextCurrentOffsetVertex = nextFrame * vertex_Count;
+   
+        Vector3[] vertices= frame.vertices;
+
+
+        int index=0;
+        for (int i=0; i<faces.Count; i++) 
+        {
+            int i0 = faces[i].v0;
+            int i1 = faces[i].v1;
+            int i2 = faces[i].v2;
+
+
+              Vector3 v1 = Vector3.Lerp(vertex[currentOffsetVertex + i0], vertex[nextCurrentOffsetVertex + i0], poll);
+              Vector3 v2 = Vector3.Lerp(vertex[currentOffsetVertex + i1], vertex[nextCurrentOffsetVertex + i1], poll);
+              Vector3 v3 = Vector3.Lerp(vertex[currentOffsetVertex + i2], vertex[nextCurrentOffsetVertex + i2], poll);
+
+            vertices[index++] = v1;
+            vertices[index++] = v2;
+            vertices[index++] = v3;
+        }
+
+        frame.vertices = vertices;
+        frame.RecalculateBounds();
+        frame.RecalculateNormals();
+    }
 	
 	// Update is called once per frame
 	void Update () 
 	{
+        if (maxFrames <= 1) return;
+
+
+        if (useKesy)
+        {
+
+            
+				if (Input.GetKey (KeyCode.LeftArrow)) 
+		       {
+                   BackAnimation();
+				} else		
+			 if (Input.GetKey (KeyCode.RightArrow)) 
+			{
+                NextAnimation();
+			} 
+        }
+
+
 
 		float time = tickcount ();
 		float elapsedTime =  time - lastTime;
 		lerptime = tickcount() / (1.0f / currAnimation.fps);
 
-	
-	
+
+        if (Manual)
+        {
+            if (Frame <= 0) Frame = 0;
+            if (Frame >= maxFrames - 1) Frame = maxFrames - 1;
+            currentFrame = Frame;
+            nextFrame = Frame + 1;
+            animate(currentFrame, nextFrame, lerptime);
+        }
+        else
+        {
 
 
 
-		nextFrame = (currentFrame+1);
-		if (nextFrame > currAnimation.frameEnd)
-		{
-			nextFrame = currAnimation.frameStart;
-		}
+            nextFrame = (currentFrame + 1);
+
+            if (nextFrame > currAnimation.frameEnd)
+            {
+                if (AnimationComplete != null)
+                {
+                    AnimationComplete(currAnimation);
+                }
+                nextFrame = currAnimation.frameStart;
+            }
+
+
+            if (RollOver)
+            {
+                if (currentFrame >= currAnimation.frameEnd)
+                {
+                    setAnimation(rollto_anim);
+                    RollOver = false;
+                }
+            }
+
+            if (elapsedTime >= (1.0f / currAnimation.fps))
+            {
+                currentFrame = nextFrame;
+                lastTime = tickcount();
+
+                animate(currentFrame, nextFrame, lerptime);
+                if (AnimationChange != null)
+                {
+                    AnimationChange(currAnimation);
+                }
+            }
+            Frame = nextFrame;
+
+        }
+
+
+
+
+
+		
 		
 
-		if (RollOver)
-		{
-			if (currentFrame >= currAnimation.frameEnd)
-			{
-				setAnimation(rollto_anim);
-				RollOver = false;
-			}
-		}
+
+
 		
-		if (elapsedTime >= (1.0f / currAnimation.fps) )
-		{
-			currentFrame = nextFrame;
-			lastTime = tickcount();	
-		}
 
 
-
-		/*
-		Mesh currMesh = frames [currentFrame];
-		Mesh nextMesh = frames[nextFrame];
-
-
-		Vector3[] vertices = frame.vertices;
-
-		for (int i=0; i< frame.triangles.Length/3; i++) 
-		{
-			int face0=	frame.triangles[i*3];
-			int face1=	frame.triangles[i*3+1];
-			int face2=	frame.triangles[i*3+2];
-
-			vertices[face0]= Vector3.Lerp(currMesh.vertices[face0],nextMesh.vertices[face0],lerptime);
-			vertices[face1]= Vector3.Lerp(currMesh.vertices[face1],nextMesh.vertices[face1],lerptime);
-			vertices[face2]= Vector3.Lerp(currMesh.vertices[face2],nextMesh.vertices[face2],lerptime);
-
-		}
-		frame.vertices = vertices;
-
-
-
-		meshFilter.sharedMesh = frame;
-
-*/
 	
-		meshFilter.sharedMesh = frames [currentFrame];
+
 
 	}
 }

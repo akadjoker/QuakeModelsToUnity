@@ -7,7 +7,9 @@ public class MD3Player : MonoBehaviour {
 	public GameObject Lower;
 	public GameObject Upper;
 
+	[HideInInspector]
 	public MD3Model anLower;
+	[HideInInspector]
 	public MD3Model anUpper;
 
 	public float anglex;
@@ -34,8 +36,10 @@ public class MD3Player : MonoBehaviour {
 	{
 
 		GameObject b = (GameObject)Instantiate (Bullet, spwLocal,Quaternion.identity);
+		Rigidbody body = b.GetComponent<Rigidbody> ();
 		Vector3 moveTo = spwLocal + spwDir * 10000;
-		b.rigidbody.AddForce(moveTo);
+		body.AddForce(moveTo);
+//		b.rigidbody.AddForce(moveTo);
 		//pel.rigidbody.AddForce(transform.forward * 8000);
 	}
 	// Use this for initialization
@@ -112,6 +116,9 @@ public class MD3Player : MonoBehaviour {
 	void Update () 
 	{
 
+				bool isTurn=false;
+				bool isMove = false;
+
 				spwLocal = Spawn.transform.position;
 				spwDir = Spawn.transform.TransformDirection (Vector3.forward);// 
 	
@@ -124,19 +131,26 @@ public class MD3Player : MonoBehaviour {
 
 
 
-				angley += yawMouse * (Time.deltaTime * yawSpeed) * sensitivity;
-				anglex += pitchMouse * (Time.deltaTime * pitchSpeed) * sensitivity;
+				anglex += yawMouse * (Time.deltaTime * yawSpeed) * sensitivity;
+				angley += pitchMouse * (Time.deltaTime * pitchSpeed) * sensitivity;
 
 
-				anglex = MathHelper.clamp (anglex, -20, 20);
-				angley = MathHelper.clamp (angley, -90, 90);
+				angley = MathHelper.clamp (angley, -20, 20);
+				anglex = MathHelper.clamp (anglex, -90, 90);
+
+				if (!isMove ) 
+				{
+						
+
+				}
 	
-				Upper.transform.localRotation = Quaternion.Euler (0, angley, anglex);
+				Upper.transform.localRotation = Quaternion.Euler (0, anglex, angley);
 
 
 	
 				if (Input.GetKey (KeyCode.W)) 
 		       {
+						isMove = true;
 						moveForward (speed);
 						anLower.setAnimation (anLower.getAnimation ("WALK"));
 			 if (Input.GetKey (KeyCode.D)) 
@@ -147,20 +161,49 @@ public class MD3Player : MonoBehaviour {
 			{
 				transform.Rotate (0, -2, 0);
 			}
+
+						if (anglex <= -30) {
+								isTurn = true;
+								transform.Rotate (0, -1.5f, 0);
+							
+						} else if (anglex >= 30) {
+								isTurn = true;
+
+								transform.Rotate (0, 1.5f, 0);
+						}
 				
 			} else
+
 		
-		if (Input.GetKey (KeyCode.D)) {
+		           if (Input.GetKey (KeyCode.D)) 
+				   {
 						transform.Rotate (0, 2, 0);
 						anLower.setAnimation (anLower.getAnimation ("TURN"));
-				} else
-		if (Input.GetKey (KeyCode.A)) 
-		{
-						transform.Rotate (0, -2, 0);
-			anLower.setAnimation (anLower.getAnimation ("TURN"));
-				} else {
-			anLower.setAnimation (anLower.getAnimation ("IDLEMOVE"));
-				}
+				   }else 
+				    
+		            if (Input.GetKey (KeyCode.A)) 
+		             {
+			          transform.Rotate (0, -2, 0);
+			           anLower.setAnimation (anLower.getAnimation ("TURN"));
+			
+		              } else 
+		              {
+										if (anglex <= -30) {
+												isTurn = true;
+												transform.Rotate (0, -0.5f, 0);
+												anLower.SetAnimationRollOver (anLower.getAnimation ("TURN"), anLower.getAnimation ("IDLEMOVE"));
+										} else if (anglex >= 30) {
+												isTurn = true;
+												anLower.SetAnimationRollOver (anLower.getAnimation ("TURN"), anLower.getAnimation ("IDLEMOVE"));
+												transform.Rotate (0, 0.5f, 0);
+										}
+										
+						if (!isMove || !isTurn) 
+						{
+								anLower.setAnimation (anLower.getAnimation ("IDLEMOVE"));
+						}
+		
+	                   }
 
 
 
@@ -176,11 +219,7 @@ public class MD3Player : MonoBehaviour {
 	}
 	private void moveForward(float speed) 
 	{
-		//Vector3 dir= Quaternion.Euler(0, fixyaw, 0) * transform.forward;
-		//transform.localPosition += dir * speed * Time.deltaTime;
 		transform.localPosition += transform.right * speed * Time.deltaTime;
-
-		//rigidbody.AddForce (dir * speed);
 	}
 	
 	private void moveBack(float speed) {

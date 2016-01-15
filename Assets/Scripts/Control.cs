@@ -16,7 +16,7 @@ public class Control : MonoBehaviour {
 	private MD2Model animation3;
 	void OnGUI()
 	{
-		GUI.Label(new Rect(10, 10, 100, 20), "Animation:"+animation1.currentAnimation);
+        GUI.Label(new Rect(10, 10, 100, 20), "Animation:"+animation1.currAnimation.name);
 		
 			}
 
@@ -26,9 +26,9 @@ public class Control : MonoBehaviour {
 		nextAnimation.onClick.AddListener(clickNext);
 
 
-		animation1 = model1.GetComponent("MD2Model") as MD2Model;
-		animation2 = model2.GetComponent("MD2Model") as MD2Model;
-		animation3 = model3.GetComponent("MD2Model") as MD2Model;
+        animation1 = model1.GetComponent<MD2Model>();
+        animation2 = model2.GetComponent<MD2Model>();
+        animation3 = model3.GetComponent<MD2Model>();
 
 		if (!animation1) 
 		{

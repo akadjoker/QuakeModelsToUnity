@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.Internal;
+using UnityEngine.Scripting;
 using System.Collections;
 
+[System.Serializable]
 public class Face  {
 
 	public int v0;
